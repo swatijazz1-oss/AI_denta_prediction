@@ -543,10 +543,9 @@ with col2:
         "Recent dental treatment"
     )
 
-
-# ============================================================
-# 3. TOOTH CHART
-# ============================================================
+    # ============================================================
+    # 3. TOOTH CHART
+    # ============================================================
 
 st.markdown(
     '<div class="section-title">'
@@ -556,22 +555,25 @@ st.markdown(
 )
 
 st.caption(
-    "Click one or more teeth that you believe "
-    "are causing the problem."
+    "Select one or more teeth. Tooth numbers follow the "
+    "FDI two-digit numbering system."
 )
 
+st.info(
+    "🦷 Right and left are from the patient's perspective. "
+    "The four sections below show the Upper Right, Upper Left, "
+    "Lower Right and Lower Left quadrants."
+)
 
 # ============================================================
 # SESSION STATE
 # ============================================================
 
 if "selected_teeth" not in st.session_state:
-
     st.session_state.selected_teeth = []
 
 
 def toggle_tooth(tooth_number):
-
     if tooth_number in st.session_state.selected_teeth:
 
         st.session_state.selected_teeth.remove(
@@ -589,49 +591,62 @@ def toggle_tooth(tooth_number):
 # FDI TOOTH NUMBERING
 # ============================================================
 
-upper_left = [
-    "18",
-    "17",
-    "16",
-    "15",
-    "14",
-    "13",
-    "12",
-    "11"
-]
-
+# Patient's right side
 upper_right = [
-    "21",
-    "22",
-    "23",
-    "24",
-    "25",
-    "26",
-    "27",
-    "28"
-]
-
-lower_left = [
-    "48",
-    "47",
-    "46",
-    "45",
-    "44",
-    "43",
-    "42",
-    "41"
+    "18", "17", "16", "15",
+    "14", "13", "12", "11"
 ]
 
 lower_right = [
-    "31",
-    "32",
-    "33",
-    "34",
-    "35",
-    "36",
-    "37",
-    "38"
+    "48", "47", "46", "45",
+    "44", "43", "42", "41"
 ]
+
+# Patient's left side
+upper_left = [
+    "21", "22", "23", "24",
+    "25", "26", "27", "28"
+]
+
+lower_left = [
+    "31", "32", "33", "34",
+    "35", "36", "37", "38"
+]
+
+
+# ============================================================
+# TOOTH BUTTON FUNCTION
+# ============================================================
+
+def display_tooth_row(
+        teeth,
+        prefix
+):
+    cols = st.columns(8)
+
+    for i, tooth_number in enumerate(teeth):
+
+        with cols[i]:
+
+            if tooth_number in st.session_state.selected_teeth:
+
+                button_label = "🔴"
+
+            else:
+
+                button_label = "🦷"
+
+            st.caption(
+                tooth_number
+            )
+
+            st.button(
+                button_label,
+                key=f"{prefix}_{tooth_number}",
+                help=f"Select tooth {tooth_number}",
+                on_click=toggle_tooth,
+                args=(tooth_number,)
+            )
 
 
 # ============================================================
@@ -639,99 +654,92 @@ lower_right = [
 # ============================================================
 
 st.markdown(
-    '<div class="jaw-label">'
-    'UPPER JAW'
-    '</div>',
+    '<div class="jaw-label">UPPER JAW</div>',
     unsafe_allow_html=True
 )
 
-upper_teeth = (
-    upper_left +
-    upper_right
-)
+# ------------------------------------------------------------
+# Upper Right / Upper Left labels
+# ------------------------------------------------------------
 
-upper_cols = st.columns(
-    16
-)
+upper_label_col1, upper_label_col2 = st.columns(2)
 
+with upper_label_col1:
+    st.markdown(
+        "**➡️ UPPER RIGHT**  \n"
+        "*Patient's right side*"
+    )
 
-for i, tooth_number in enumerate(
-    upper_teeth
-):
+with upper_label_col2:
+    st.markdown(
+        "**UPPER LEFT ⬅️**  \n"
+        "*Patient's left side*"
+    )
 
-    with upper_cols[i]:
+# ------------------------------------------------------------
+# Upper teeth
+# ------------------------------------------------------------
 
-        st.caption(
-            tooth_number
-        )
+upper_col1, upper_col2 = st.columns(2)
 
-        if tooth_number in st.session_state.selected_teeth:
+with upper_col1:
+    display_tooth_row(
+        upper_right,
+        "upper_right"
+    )
 
-            button_label = "🔴"
-
-        else:
-
-            button_label = "🦷"
-
-        st.button(
-            button_label,
-            key=f"upper_tooth_{tooth_number}",
-            help=f"Select tooth {tooth_number}",
-            on_click=toggle_tooth,
-            args=(tooth_number,)
-        )
-
+with upper_col2:
+    display_tooth_row(
+        upper_left,
+        "upper_left"
+    )
 
 st.divider()
-
 
 # ============================================================
 # LOWER JAW
 # ============================================================
 
 st.markdown(
-    '<div class="jaw-label">'
-    'LOWER JAW'
-    '</div>',
+    '<div class="jaw-label">LOWER JAW</div>',
     unsafe_allow_html=True
 )
 
-lower_teeth = (
-    lower_left +
-    lower_right
-)
+# ------------------------------------------------------------
+# Lower Right / Lower Left labels
+# ------------------------------------------------------------
 
-lower_cols = st.columns(
-    16
-)
+lower_label_col1, lower_label_col2 = st.columns(2)
 
+with lower_label_col1:
+    st.markdown(
+        "**➡️ LOWER RIGHT**  \n"
+        "*Patient's right side*"
+    )
 
-for i, tooth_number in enumerate(
-    lower_teeth
-):
+with lower_label_col2:
+    st.markdown(
+        "**LOWER LEFT ⬅️**  \n"
+        "*Patient's left side*"
+    )
 
-    with lower_cols[i]:
+# ------------------------------------------------------------
+# Lower teeth
+# ------------------------------------------------------------
 
-        st.caption(
-            tooth_number
-        )
+lower_col1, lower_col2 = st.columns(2)
 
-        if tooth_number in st.session_state.selected_teeth:
+with lower_col1:
+    display_tooth_row(
+        lower_right,
+        "lower_right"
+    )
 
-            button_label = "🔴"
-
-        else:
-
-            button_label = "🦷"
-
-        st.button(
-            button_label,
-            key=f"lower_tooth_{tooth_number}",
-            help=f"Select tooth {tooth_number}",
-            on_click=toggle_tooth,
-            args=(tooth_number,)
-        )
-
+with lower_col2:
+    display_tooth_row(
+        lower_left,
+        "lower_left"
+    )
 
 # ============================================================
 # SELECTED TEETH
@@ -741,7 +749,6 @@ selected_teeth = (
     st.session_state.selected_teeth
 )
 
-
 if selected_teeth:
 
     selected_text = ", ".join(
@@ -749,8 +756,7 @@ if selected_teeth:
     )
 
     st.success(
-        f"🦷 Selected tooth/teeth: "
-        f"{selected_text}"
+        f"🦷 Selected tooth/teeth: {selected_text}"
     )
 
 else:
@@ -758,9 +764,7 @@ else:
     st.info(
         "No specific tooth selected."
     )
-
-
-# ============================================================
+#============================================================
 # 4. ADDITIONAL INFORMATION
 # ============================================================
 
