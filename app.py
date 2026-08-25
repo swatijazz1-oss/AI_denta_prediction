@@ -108,10 +108,6 @@ client = genai.Client(
 # CUSTOM CSS
 # ============================================================
 
-# ============================================================
-# CSS
-# ============================================================
-
 st.markdown(
     """
     <style>
@@ -215,6 +211,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 
 # ============================================================
 # HEADER
@@ -330,7 +327,7 @@ with st.sidebar:
     )
 
 
-## ============================================================
+# ============================================================
 # 1. IMAGE UPLOAD
 # ============================================================
 
@@ -435,6 +432,8 @@ else:
     st.info(
         "Select an image source above to continue."
     )
+
+
 # ============================================================
 # 2. PATIENT INFORMATION
 # ============================================================
@@ -543,9 +542,10 @@ with col2:
         "Recent dental treatment"
     )
 
-    # ============================================================
-    # 3. TOOTH CHART
-    # ============================================================
+
+# ============================================================
+# 3. TOOTH CHART
+# ============================================================
 
 st.markdown(
     '<div class="section-title">'
@@ -553,6 +553,41 @@ st.markdown(
     '</div>',
     unsafe_allow_html=True
 )
+
+st.caption(
+    "Use the FDI tooth numbering reference below to "
+    "identify the correct tooth before making your selection."
+)
+
+
+# ============================================================
+# FDI TOOTH NUMBERING REFERENCE IMAGE
+# ============================================================
+
+fdi_chart_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "fdi_tooth_chart.png"
+)
+
+if os.path.exists(fdi_chart_path):
+
+    st.image(
+        fdi_chart_path,
+        caption=(
+            "FDI tooth numbering reference — "
+            "right and left are from the patient's perspective."
+        ),
+        width=350
+    )
+
+else:
+
+    st.warning(
+        "FDI tooth numbering reference image was not found. "
+        "Please make sure 'fdi_tooth_chart.png' is in the "
+        "same folder as app.py."
+    )
+
 
 st.caption(
     "Select one or more teeth. Tooth numbers follow the "
@@ -565,15 +600,18 @@ st.info(
     "Lower Right and Lower Left quadrants."
 )
 
+
 # ============================================================
 # SESSION STATE
 # ============================================================
 
 if "selected_teeth" not in st.session_state:
+
     st.session_state.selected_teeth = []
 
 
 def toggle_tooth(tooth_number):
+
     if tooth_number in st.session_state.selected_teeth:
 
         st.session_state.selected_teeth.remove(
@@ -592,6 +630,7 @@ def toggle_tooth(tooth_number):
 # ============================================================
 
 # Patient's right side
+
 upper_right = [
     "18", "17", "16", "15",
     "14", "13", "12", "11"
@@ -602,7 +641,9 @@ lower_right = [
     "44", "43", "42", "41"
 ]
 
+
 # Patient's left side
+
 upper_left = [
     "21", "22", "23", "24",
     "25", "26", "27", "28"
@@ -622,6 +663,7 @@ def display_tooth_row(
         teeth,
         prefix
 ):
+
     cols = st.columns(8)
 
     for i, tooth_number in enumerate(teeth):
@@ -658,23 +700,29 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # ------------------------------------------------------------
 # Upper Right / Upper Left labels
 # ------------------------------------------------------------
 
 upper_label_col1, upper_label_col2 = st.columns(2)
 
+
 with upper_label_col1:
+
     st.markdown(
         "**➡️ UPPER RIGHT**  \n"
         "*Patient's right side*"
     )
 
+
 with upper_label_col2:
+
     st.markdown(
         "**UPPER LEFT ⬅️**  \n"
         "*Patient's left side*"
     )
+
 
 # ------------------------------------------------------------
 # Upper teeth
@@ -682,19 +730,25 @@ with upper_label_col2:
 
 upper_col1, upper_col2 = st.columns(2)
 
+
 with upper_col1:
+
     display_tooth_row(
         upper_right,
         "upper_right"
     )
 
+
 with upper_col2:
+
     display_tooth_row(
         upper_left,
         "upper_left"
     )
 
+
 st.divider()
+
 
 # ============================================================
 # LOWER JAW
@@ -705,23 +759,29 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # ------------------------------------------------------------
 # Lower Right / Lower Left labels
 # ------------------------------------------------------------
 
 lower_label_col1, lower_label_col2 = st.columns(2)
 
+
 with lower_label_col1:
+
     st.markdown(
         "**➡️ LOWER RIGHT**  \n"
         "*Patient's right side*"
     )
 
+
 with lower_label_col2:
+
     st.markdown(
         "**LOWER LEFT ⬅️**  \n"
         "*Patient's left side*"
     )
+
 
 # ------------------------------------------------------------
 # Lower teeth
@@ -729,17 +789,22 @@ with lower_label_col2:
 
 lower_col1, lower_col2 = st.columns(2)
 
+
 with lower_col1:
+
     display_tooth_row(
         lower_right,
         "lower_right"
     )
 
+
 with lower_col2:
+
     display_tooth_row(
         lower_left,
         "lower_left"
     )
+
 
 # ============================================================
 # SELECTED TEETH
@@ -748,6 +813,7 @@ with lower_col2:
 selected_teeth = (
     st.session_state.selected_teeth
 )
+
 
 if selected_teeth:
 
@@ -764,7 +830,9 @@ else:
     st.info(
         "No specific tooth selected."
     )
-#============================================================
+
+
+# ============================================================
 # 4. ADDITIONAL INFORMATION
 # ============================================================
 
