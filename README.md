@@ -1,536 +1,228 @@
 # 🦷 AI Dental Analyzer
 
-An AI-assisted dental image analysis application that combines **multimodal AI, Retrieval-Augmented Generation (RAG), dental knowledge retrieval, web fallback, structured patient information, and analytics** to provide a preliminary educational assessment of dental images.
+**AI Dental Analyzer** is an AI-powered dental assistance system that analyzes dental images along with patient symptoms and tooth-specific information to provide a **preliminary educational assessment**.
 
-> ⚠️ **Medical Disclaimer:** This application is intended for educational and preliminary assessment purposes only. It does not provide a definitive medical diagnosis and must not replace examination, diagnosis, or treatment by a qualified dental professional.
-
----
+> ⚠️ **Medical Disclaimer:** This application is for educational and preliminary assessment purposes only. It is not a replacement for professional dental diagnosis or treatment.
 
 ## 🚀 Overview
 
-AI Dental Analyzer allows users to upload or capture a dental photograph, provide structured symptom information, select affected teeth using the **FDI two-digit tooth numbering system**, and receive an AI-assisted preliminary assessment.
+The system combines **multimodal AI, RAG, vector search, web search, and an AI-driven backend** to provide contextual dental information.
 
-The system combines:
+### 🔑 Key Features
 
-- 🖼️ Dental image analysis
-- 📋 Structured patient information
-- 🦷 Interactive FDI tooth selection
-- 🤖 Gemini multimodal AI
-- 🔎 Retrieval-Augmented Generation (RAG)
-- 🧠 Vector-based dental knowledge retrieval
-- 🌐 Web fallback for additional supporting information
-- 💾 Supabase database storage
-- 📊 Analytics dashboard
-- 🔐 Google authentication
-- 🌐 Streamlit deployment
+* 🖼️ Upload/capture dental images
+* 📋 Collect patient symptoms and medical information
+* 🦷 Select affected teeth using the **FDI tooth numbering system**
+* 🤖 Analyze images using **Google Gemini multimodal AI**
+* 🔎 Retrieve relevant dental knowledge using **RAG**
+* 🧠 Generate embeddings using **Sentence Transformers**
+* 🗄️ Store and search vectors using **PostgreSQL + pgvector**
+* 🌐 Use **Tavily Search API** for web-based information when RAG results are insufficient
+* ⚡ FastAPI backend for APIs and application logic
+* ⚛️ React frontend for the user interface
+* 🔗 LangChain for LLM, prompt, retrieval, and tool integration
+* 🔄 LangGraph for managing multi-step AI workflows and decision-based execution
+* 💾 Supabase/PostgreSQL for application data
+* 📊 Analytics dashboard
+* 🔐 Google OAuth authentication
 
----
+## 🧠 AI & RAG Architecture
 
-## ✨ Features
-
-### 🖼️ Dental Image Input
-
-Users can:
-
-- Upload a JPG/JPEG/PNG dental image
-- Capture a dental image using the device camera
-- Preview the selected image before analysis
-
-The application validates the image format before sending it for analysis.
-
----
-
-### 📋 Patient Information
-
-The application collects structured information including:
-
-- Age
-- Pain level
-- Pain type
-- Pain duration
-- Cold sensitivity
-- Hot sensitivity
-- Pain while chewing
-- Gum bleeding
-- Gum swelling
-- Persistent bad breath
-- Tooth mobility
-- Recent dental treatment
-- Additional patient description
-
-This structured information is combined with the image to improve the context available to the AI model.
-
----
-
-### 🦷 Interactive Tooth Selection
-
-The application provides an interactive dental chart based on the:
-
-**FDI two-digit tooth numbering system**
-
-Users can select one or multiple affected teeth.
-
-Example:
+The application follows a retrieval-first architecture:
 
 ```text
-11 12 13 14 15 16 17 18
-21 22 23 24 25 26 27 28
+User
+ │
+ ▼
+React Frontend
+ │
+ ▼
+FastAPI Backend
+ │
+ ├── Patient & Image Data
+ │
+ ├── LangChain
+ │     ├── Prompt Management
+ │     ├── Retriever
+ │     └── LLM Integration
+ │
+ ▼
+LangGraph Workflow
+ │
+ ├── Build Retrieval Query
+ │
+ ├── Generate Embedding
+ │
+ ▼
+Sentence Transformer
+ │
+ ▼
+PostgreSQL + pgvector
+ │
+ ├── Relevant Knowledge Found
+ │         │
+ │         ▼
+ │      RAG Context
+ │
+ └── Insufficient Results
+           │
+           ▼
+      Tavily Search API
+           │
+           ▼
+      Web Supporting Context
+           │
+           ▼
+     Gemini Multimodal AI
+           │
+           ▼
+   Preliminary Assessment
+```
 
-31 32 33 34 35 36 37 38
-41 42 43 44 45 46 47 48
-Selected teeth are highlighted in the interface.
+### 🔎 RAG
 
-🤖 Multimodal AI Analysis
+The dental knowledge base is converted into vector embeddings using a **Sentence Transformer embedding model** and stored in **PostgreSQL with pgvector**.
 
-The application uses Google's Gemini multimodal model to analyze:
+When a user submits symptoms and dental information:
 
-The uploaded dental photograph
-Patient symptoms
-Selected teeth
-Retrieved dental knowledge
-Web fallback information when required
+1. A retrieval query is created.
+2. The query is converted into an embedding.
+3. PostgreSQL/pgvector performs similarity search.
+4. Relevant dental knowledge is retrieved.
+5. Retrieved context is passed to the LLM.
 
-The AI response is structured into:
+### 🌐 Tavily Web Search
 
-1. Visible observations
+When the retrieved knowledge does not meet the configured similarity threshold, the system uses the **Tavily Search API** to find additional supporting information from the web.
 
-Findings that can reasonably be observed from the photograph.
+Tavily results are treated as supporting context and not as a definitive diagnosis.
 
-2. Reported symptoms
+## 🔗 LangChain & LangGraph
 
-A summary of the information provided by the user.
+**LangChain** is used where LLM orchestration is required, including prompt construction, retrieval integration, model interaction, and connecting AI tools/components.
 
-3. Possible explanations
+**LangGraph** is used to structure the application's multi-step AI workflow. It allows the system to move through steps such as retrieval, checking retrieval quality, triggering Tavily when necessary, and finally generating the assessment.
 
-Potential explanations are presented cautiously using language such as:
+## 🛠️ Technology Stack
 
-"may be consistent with"
-"could be associated with"
-"one possibility is"
-4. Image limitations
+| Technology                | Purpose                                        |
+| ------------------------- | ---------------------------------------------- |
+| **React**                 | Frontend UI                                    |
+| **FastAPI**               | Backend API and application logic              |
+| **Python**                | Core backend language                          |
+| **Google Gemini**         | Multimodal dental image + text analysis        |
+| **LangChain**             | LLM and retrieval orchestration                |
+| **LangGraph**             | Multi-step AI workflow orchestration           |
+| **Sentence Transformers** | Text embedding generation                      |
+| **PostgreSQL + pgvector** | Vector database and similarity search          |
+| **Tavily Search API**     | Web search / fallback retrieval                |
+| **Supabase**              | Database infrastructure/authentication support |
+| **Pandas**                | Analytics and data processing                  |
+| **Google OAuth**          | Authentication                                 |
+| **Git/GitHub**            | Version control                                |
 
-Explains what cannot reliably be determined from a photograph.
+## 📁 Project Structure
 
-5. Preliminary concern level
-
-The system categorizes the preliminary concern as:
-
-Low
-Moderate
-High
-6. Recommended next step
-
-Provides a practical recommendation based on the available information.
-
-7. Warning signs
-
-Highlights symptoms that may require prompt professional evaluation.
-
-🔎 Retrieval-Augmented Generation (RAG)
-
-The application uses a local dental knowledge base together with vector similarity search.
-
-The RAG pipeline works approximately as follows:
-Patient information
-        │
-        ▼
-Construct retrieval query
-        │
-        ▼
-Generate embedding
-        │
-        ▼
-Vector similarity search
-        │
-        ▼
-Retrieve relevant dental knowledge
-        │
-        ▼
-Apply similarity threshold
-        │
-        ▼
-Add relevant knowledge to AI prompt
-The application displays retrieval information such as:
-Highest retrieval similarity
-Configured threshold
-Knowledge items retrieved
-Example:
-Highest retrieval similarity: 0.685
-Configured threshold: 0.600
-Knowledge items retrieved: 3
-Dental Knowledge Base
-
-The project contains a structured dental knowledge base under:
-
-knowledge/
-
-The knowledge pipeline includes:
-
-knowledge/
-├── __init__.py
-├── documents.py
-├── embeddings.py
-└── ingest.py
-
-The system generates embeddings for dental knowledge and stores/retrieves them through the configured vector database.
-
-🌐 Web Fallback
-
-RAG is not always guaranteed to return sufficiently relevant information.
-
-The application therefore implements a fallback mechanism:
-
-             ┌──────────────────────┐
-             │ Patient information  │
-             │ + image context      │
-             └──────────┬───────────┘
-                        │
-                        ▼
-                ┌───────────────┐
-                │ Vector Search │
-                └───────┬───────┘
-                        │
-              ┌─────────┴─────────┐
-              │                   │
-       Relevant results      Insufficient
-              │                   │
-              ▼                   ▼
-        Use RAG context       Web fallback
-                                  │
-                                  ▼
-                         Supporting information
-
-If the highest RAG similarity is below the configured threshold, the application can perform a web search for relevant dental information.
-
-The web results are then provided to Gemini as supporting context.
-
-The application does not treat web information as a definitive diagnosis.
-
-💾 Database
-
-Supabase is used to store assessment information.
-
-Stored information includes:
-
-Age
-Pain level
-Pain type
-Pain duration
-Symptoms
-Affected teeth
-User description
-Image filename
-Image MIME type
-AI analysis
-Concern level
-Assessment timestamp
-
-The database functionality is implemented in:
-
-database.py
-📊 Analytics Dashboard
-
-The project includes an analytics dashboard for reviewing assessment data.
-
-The dashboard provides information such as:
-
-Overview
-Total assessments
-Average pain level
-Average age
-Most common concern level
-Concern Analysis
-Low
-Moderate
-High
-Pain Analysis
-Pain type distribution
-Pain level distribution
-Symptom Analysis
-Cold sensitivity
-Hot sensitivity
-Chewing pain
-Gum bleeding
-Gum swelling
-Bad breath
-Tooth mobility
-Recent dental treatment
-Demographic Analysis
-Age distribution
-Tooth Analysis
-Most frequently selected teeth
-Recent Assessments
-
-A table of recently recorded assessments.
-
-The analytics functionality is implemented in:
-
-analytics.py
-
-and exposed through:
-
-pages/2_Analytics.py
-🔐 Authentication
-
-The application supports Google authentication using OAuth.
-
-Authentication helps restrict application access and provides a more controlled deployment environment.
-
-OAuth credentials and application secrets should never be committed to GitHub.
-
-🏗️ Project Structure
-AI_denta_prediction/
+```text
+AI-Dental/
 │
-├── .streamlit/
-│   └── secrets.toml          # Local secrets - NOT committed
+├── frontend/                # React frontend
 │
-├── knowledge/
-│   ├── __init__.py
-│   ├── documents.py
-│   ├── embeddings.py
-│   └── ingest.py
+├── backend/                # FastAPI backend
 │
-├── pages/
-│   └── 2_Analytics.py
+├── knowledge/               # Dental knowledge base
 │
-├── app.py                    # Main Streamlit application
-├── analytics.py              # Analytics functionality
-├── database.py               # Supabase database operations
-├── rag.py                    # RAG retrieval
-├── web_fallback.py           # Web retrieval fallback
+├── rag/                     # RAG and vector retrieval
 │
-├── test_analytics.py         # Analytics testing
-├── test_embedding.py         # Embedding testing
-├── test_rag.py               # RAG testing
+├── agents/                  # LangChain/LangGraph workflows
+│
+├── database/                # PostgreSQL/Supabase operations
+│
+├── tests/                   # Test files
 │
 ├── requirements.txt
-├── .gitignore
+├── .env
 └── README.md
-🔄 Application Architecture
+```
 
-The overall system can be represented as:
+## ⚙️ Environment Variables
 
-                         ┌──────────────────┐
-                         │      User        │
-                         └────────┬─────────┘
-                                  │
-                                  ▼
-                    ┌─────────────────────────┐
-                    │ Streamlit Frontend      │
-                    │                         │
-                    │ Image / Camera          │
-                    │ Patient information     │
-                    │ Tooth selection         │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │ Retrieval Query Builder │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │ Vector Database / RAG   │
-                    └────────────┬────────────┘
-                                 │
-                         ┌───────┴────────┐
-                         │                │
-                    Relevant          Insufficient
-                    knowledge          relevance
-                         │                │
-                         │                ▼
-                         │       ┌────────────────┐
-                         │       │ Web Fallback   │
-                         │       └───────┬────────┘
-                         │               │
-                         └───────┬───────┘
-                                 ▼
-                    ┌─────────────────────────┐
-                    │ Gemini Multimodal AI    │
-                    │                         │
-                    │ Image + symptoms +      │
-                    │ retrieved knowledge     │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │ Preliminary Assessment  │
-                    └────────────┬────────────┘
-                                 │
-                    ┌────────────┴────────────┐
-                    ▼                         ▼
-             Supabase Database          User Interface
-                    │
-                    ▼
-             Analytics Dashboard
-🛠️ Technology Stack
-Technology	Purpose
-Python	Core programming language
-Streamlit	Web application frontend
-Google Gemini	Multimodal AI analysis
-RAG	Retrieval-Augmented Generation
-Vector Search	Dental knowledge retrieval
-Supabase	Database and data storage
-Pandas	Analytics and data processing
-BeautifulSoup	Web content extraction
-Google OAuth	Authentication
-Git/GitHub	Version control and source hosting
-⚙️ Installation
-1. Clone the repository
-git clone https://github.com/swatijazz1-oss/AI_denta_prediction.git
-
-Move into the project:
-
-cd AI_denta_prediction
-2. Create a virtual environment
-Windows
-python -m venv .venv
-
-Activate it:
-
-.venv\Scripts\activate
-macOS/Linux
-python3 -m venv .venv
-source .venv/bin/activate
-3. Install dependencies
-pip install -r requirements.txt
-🔑 Environment Variables
-
-Create a .env file locally.
-
-Example:
-
+```env
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=your_gemini_model
 
+TAVILY_API_KEY=your_tavily_api_key
 
-RAG_THRESHOLD=0.60
-
+DATABASE_URL=your_postgresql_database_url
 
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
 
-Do not commit .env to GitHub.
+RAG_THRESHOLD=0.60
+```
 
-The repository already ignores sensitive files through .gitignore.
+Never commit `.env` or other credentials to GitHub.
 
-▶️ Running the Application
+## ▶️ Running the Project
 
-Start the Streamlit application:
+### Backend
 
-streamlit run app.py
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
-The application will normally be available at:
+### Frontend
 
-http://localhost:8501
-🧪 Testing
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-The project contains separate test scripts for major components.
+## 🔄 User Workflow
 
-Test embeddings
-python test_embedding.py
-Test RAG
-python test_rag.py
-Test analytics
-python test_analytics.py
-📈 Example Workflow
+```text
+Login
+  ↓
+Upload/Capture Dental Image
+  ↓
+Enter Symptoms
+  ↓
+Select Affected Tooth
+  ↓
+FastAPI Backend
+  ↓
+LangGraph Workflow
+  ↓
+RAG Search using Sentence Transformers + PostgreSQL/pgvector
+  ↓
+Enough Context?
+ ┌───────────────┴───────────────┐
+ │                               │
+Yes                             No
+ │                               │
+ ▼                               ▼
+RAG Context                Tavily Search API
+ │                               │
+ └───────────────┬───────────────┘
+                 ▼
+          Gemini Multimodal AI
+                 ↓
+       Preliminary Assessment
+                 ↓
+        Store Assessment
+```
 
-A typical user workflow is:
+## ⚠️ Medical Safety
 
-1. Open application
-        ↓
-2. Sign in
-        ↓
-3. Upload or capture dental image
-        ↓
-4. Enter patient symptoms
-        ↓
-5. Select affected teeth
-        ↓
-6. Click "Analyze Tooth"
-        ↓
-7. Retrieve dental knowledge
-        ↓
-8. Use web fallback if necessary
-        ↓
-9. Analyze image + context with Gemini
-        ↓
-10. Display preliminary assessment
-        ↓
-11. Save assessment
-        ↓
-12. View aggregated analytics
-🔒 Security Considerations
+The system provides **preliminary AI-assisted information only**.
 
-Sensitive credentials should never be stored in the GitHub repository.
+Dental photographs cannot reliably determine every underlying condition, and AI-generated information can be incorrect. Professional dental examination and appropriate clinical tests may be required for diagnosis and treatment.
 
-The following files are excluded from version control:
+## 👩‍💻 Project
 
-.env
-.streamlit/secrets.toml
-.venv/
-.idea/
-__pycache__/
+**AI Dental Analyzer — Venus John**
 
-For production deployment, secrets should be configured using the deployment platform's secret management system.
-
-⚠️ Medical Safety
-
-This project is an AI-assisted educational tool, not a replacement for professional dental care.
-
-Important limitations include:
-
-Dental photographs cannot reliably determine pulp vitality.
-Photographs cannot reliably determine the depth of decay.
-Radiographs may be required to evaluate roots and surrounding bone.
-AI-generated explanations may be incorrect.
-Web information may be incomplete or outdated.
-Visual findings should not be interpreted as confirmed diagnoses.
-
-Users should seek evaluation from a qualified dental professional for diagnosis and treatment.
-
-Urgent professional/medical evaluation may be appropriate for symptoms such as:
-
-Significant facial or oral swelling
-Difficulty breathing
-Difficulty swallowing
-Severe or rapidly worsening pain
-Fever or systemic illness
-Other concerning symptoms
-🚧 Current Limitations
-
-The current system has several limitations:
-
-Image-based assessment is limited by image quality.
-A photograph cannot replace clinical examination.
-RAG quality depends on the available knowledge base.
-Web fallback information may vary in quality.
-AI-generated results require professional verification.
-The system does not independently establish a definitive diagnosis.
-🔮 Future Improvements
-
-Potential future improvements include:
-
-Improved dental image classification
-More comprehensive dental knowledge base
-Better tooth-level localization
-Dental X-ray analysis
-Automatic concern-level extraction
-More advanced analytics
-User assessment history
-Doctor/dentist review workflow
-Improved authentication and role-based access
-Better source citation and provenance
-Automated model evaluation
-More robust clinical validation
-Mobile-friendly interface
-👩‍💻 Project
-
-AI Dental Analyzer
-
-An AI-assisted dental image analysis and retrieval system built using Python, Streamlit, Gemini, RAG, Supabase, and web-based supporting information.
-
-GitHub:
-
-https://github.com/swatijazz1-oss/AI_denta_prediction
-
+An AI-assisted dental image analysis platform combining **React, FastAPI, Gemini, LangChain, LangGraph, RAG, Sentence Transformers, PostgreSQL/pgvector, Tavily Search API, and Supabase**.
